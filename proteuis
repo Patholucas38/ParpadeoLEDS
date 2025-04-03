@@ -1,0 +1,45 @@
+   ORG 0x00
+    GOTO inicio  ; Salto al inicio del programa
+
+    ORG 0x05     ; Inicio del código de usuario
+
+inicio:
+    BSF STATUS, RP0  ; Cambiar a banco 1
+    CLRF TRISB       ; Configurar PORTB como salida
+    BCF STATUS, RP0  ; Volver a banco 0
+
+    CLRF PORTB       ; Asegurar que los LEDs comienzan apagados
+   
+
+loop:
+    BSF PORTB, 0     ; Encender LED en RB0
+    BCF PORTB, 1     ; Apagar LED en RB1
+    CALL espera      ; Esperar un tiempo
+
+    BCF PORTB, 0     ; Apagar LED en RB0
+    BSF PORTB, 1     ; Encender LED en RB1
+    CALL espera      ; Esperar un tiempo
+    
+    BSF PORTB, 2     ; Encender LED en RB2
+    CALL espera      ; Esperar un tiempo
+    
+    BCF PORTB, 2     ; Apagar LED en RB2
+    CALL espera      ; Esperar un tiempo
+    
+    GOTO loop        ; Repetir el ciclo
+
+espera:
+    MOVLW 0xFF
+    MOVWF 0x20
+ciclo1:
+    MOVLW 0xFF
+    MOVWF 0x21
+ciclo2:
+    NOP
+    DECFSZ 0x21, f
+    GOTO ciclo2
+    DECFSZ 0x20, f
+    GOTO ciclo1
+    RETURN
+
+    END
