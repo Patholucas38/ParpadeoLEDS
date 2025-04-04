@@ -1,0 +1,64 @@
+    #include <xc.inc>
+
+    ; Definir el vector de reset
+    PSECT udata_acs
+    resetVector:
+        GOTO inicio  ; Saltar al inicio del programa
+
+    ; Sección de código principal
+    PSECT code
+inicio:
+    BANKSEL TRISB
+    MOVLW 0x08  ; Configurar RB3 como entrada, los demás como salida
+    MOVWF TRISB
+    
+    BANKSEL PORTB 
+    CLRF PORTB  ; Asegura que los LEDs comienzan apagados
+    
+loop:
+    CALL manejarBoton  ; Llamada a la rutina de manejo de botón
+    CALL secuenciaCompleta  ; Ejecutar secuencia de LEDs
+    GOTO loop            ; Repetir el proceso
+
+manejarBoton:
+    BANKSEL PORTB
+    BTFSS PORTB, 3  ; Si el botón NO está presionado, permitir parpadeo normal
+    GOTO parpadearRB0  
+    BCF PORTB, 0    ; Si el botón está presionado, apagar RB0
+    RETURN  
+
+parpadearRB0:
+    BSF PORTB, 0   ; Encender LED en RB0
+    CALL delay   
+    BCF PORTB, 0   ; Apagar LED en RB0
+    CALL delay
+    RETURN
+
+secuenciaCompleta:
+    BCF PORTB, 1  ; Apagar LED en RB1
+    CALL delay   ; Espera un tiempo
+
+    BSF PORTB, 1  ; Encender LED en RB1
+    CALL delay   ; Espera un tiempo
+
+    BSF PORTB, 2  ; Encender LED en RB2
+    CALL delay   ; Espera un tiempo
+
+    BCF PORTB, 2  ; Apagar LED en RB2
+    CALL delay   ; Espera un tiempo
+    RETURN
+
+delay:
+    MOVLW 0xFF  
+    MOVWF 0x20  
+loop1:
+    MOVLW 0xFF  
+    MOVWF 0x21  
+loop2:
+    DECFSZ 0x21, f
+    GOTO loop2
+    DECFSZ 0x20, f
+    GOTO loop1
+    RETURN
+
+    END
